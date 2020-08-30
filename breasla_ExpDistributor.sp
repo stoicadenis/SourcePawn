@@ -6,23 +6,27 @@ public Action ExpGuild(int client, int args){
 	if(args == 1){
 		int suma=StringToInt(sum);
 		if(!g_bIsPlayerInGuild[client]){
-			CPrintToChatEx(client, client, "{green}[BREASLA] {default}Nu esti intr-o breasla pentru a depune EXP!");
+			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Nu esti intr-o breasla pentru a depune EXP!");
 			return Plugin_Handled;
 		}
 		if(suma<1){
-			CPrintToChatEx(client, client, "{green}[BREASLA] {default}Introdu o suma valida pentru a depune EXP in breasla!");
+			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Introdu o suma valida pentru a depune EXP in breasla!");
 			return Plugin_Handled;
 		}
 		if(Shop_GetClientCredits(client)<suma){
-			CPrintToChatEx(client, client, "{green}[BREASLA] {default}Nu ai suficiente credite sa depui EXP in breasla!");
+			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Nu ai suficiente credite sa depui EXP in breasla!");
 			return Plugin_Handled;
 		}
 		else
 		{
 			char buffer[200], steamid[22]; 
 			GetClientAuthId(client, AuthId_Steam2, steamid, sizeof(steamid));
+			Shop_TakeClientCredits(client, suma);
+			CPrintToChat(client, "{green}[FACTIONS] {default}Ai depus %d in FACTIUNE!", suma);
 			Format(buffer, sizeof(buffer), "SELECT * FROM guild_players WHERE steamid_player = '%s'", steamid);
 			SQL_TQuery(db, SQL_AddExp, buffer, suma);
+			Format(buffer, sizeof(buffer), "SELECT * FROM guild WHERE steamid = '%s'", steamid);
+			SQL_TQuery(db, SQL_LoadPlayerGuild, buffer, GetClientUserId(client));
 		}	
 	}
 	return Plugin_Handled;
@@ -52,7 +56,7 @@ public void SQL_AddExp(Handle owner, Handle hndl, const char[] error, any data)
 	if(SQL_FetchRow(hndl))
 	{
 		char buffer[200];
-		SQL_FetchString(hndl, 2, nume_guild, sizeof(nume_guild));
+		SQL_FetchString(hndl, 2, nume_guild, sizeof(nume_guild));		
 		Format(buffer, sizeof(buffer), "UPDATE guild SET exp = (exp + %d) WHERE name = '%s'", suma, nume_guild);
 		SQL_TQuery(db, SQLErrorCheckCallback, buffer);
 		UpdateLevel();

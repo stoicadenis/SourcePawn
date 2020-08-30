@@ -32,7 +32,11 @@ public Action ChangeName(int client, int args){
 				GetClientAuthId(client, AuthId_Steam2, steamid, sizeof(steamid));
 				Format(buffer, sizeof(buffer), "UPDATE guild SET name = '%s' WHERE steamid = '%s' ", numeb, steamid);
 				SQL_TQuery(db, SQLErrorCheckCallback, buffer);
-				CPrintToChat(client, "{green}[FACTIONS] {default}Numele FACTIUNII a fost actualizat cu succes!");
+				Format(buffer, sizeof(buffer), "UPDATE guild_players SET nume_guild = '%s' WHERE nume_guild = '%s' ", numeb, PlayerGuildTag[client]);
+				SQL_TQuery(db, SQLErrorCheckCallback, buffer);
+				Format(buffer, sizeof(buffer), "SELECT * FROM guild WHERE steamid = '%s'", steamid);
+				SQL_TQuery(db, SQL_LoadPlayerGuild, buffer, GetClientUserId(client));
+				CPrintToChat(client, "{green}[FACTIONS] {default}Numele FACTIUNII a fost inregistrat cu succes, reconecteaza-te pentru a se actualiza FACTIUNEA!");
 			}
 		}
 	}

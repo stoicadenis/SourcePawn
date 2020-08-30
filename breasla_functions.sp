@@ -24,7 +24,7 @@ public void InitializeDB(){
 		`name` varchar(22) NOT NULL, \
 		`owner` varchar(50) NOT NULL, \
 		`steamid` varchar(22) NOT NULL, \
-		`exp` int(12) NULL, \
+		`exp` int(12) NOT NULL, \
 		`bonus1` int(2), \
 		`bonus2` int(2), \
 		`bonus3` int(2), \
@@ -85,7 +85,7 @@ public void SQL_ContinueLoadGuild(Handle owner, Handle hndl, const char[] error,
 {
 	if(owner == INVALID_HANDLE || hndl == INVALID_HANDLE)
 	{
-		LogError("SQL_LoadPlayerGuild returned error: %s", error); 
+		LogError("SQL_ContinueLoadGuild returned error: %s", error); 
 		return; 
 	}
 	
@@ -127,7 +127,7 @@ public void SQL_LoadPlayerGuild(Handle owner, Handle hndl, const char[] error, a
 		SQL_FieldNameToNum(hndl, "nume_guild", nume_col);
 		SQL_FetchString(hndl, nume_col, nume, sizeof(nume));
 		StrCopy(PlayerGuildTag[client], sizeof(PlayerGuildTag), nume);
-		StrCat(PlayerGuildTag[client], sizeof(PlayerGuildTag), "☆");
+		//StrCat(PlayerGuildTag[client], sizeof(PlayerGuildTag), "☆");
 		Format(buffer, sizeof(buffer), "SELECT * FROM guild WHERE name = '%s'", nume);
 		SQL_TQuery(db, SQL_ContinueLoadGuild, buffer, GetClientUserId(client));
 	}

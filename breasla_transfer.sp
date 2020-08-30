@@ -1,4 +1,5 @@
-int suma_transfer[MAXPLAYERS+1];
+int suma_transfer[MAXPLAYERS+1], clientid;
+bool g_bTargetGuild[MAXPLAYERS+1];
 
 public Action TransferCredits(int client, int args){
 	if(args < 2 || args >= 3){
@@ -18,8 +19,23 @@ public Action TransferCredits(int client, int args){
 		if(target!=-1){
 			char steamid[22], buffer[200];
 			GetClientAuthId(target, AuthId_Steam2, steamid, sizeof(steamid));
+			clientid=client;
 			Format(buffer, sizeof(buffer), "SELECT * FROM guild_players WHERE steamid_player = '%s'", steamid);
-			SQL_TQuery(db, SQL_Transfer, buffer, GetClientUserId(client), GetClientUserId(target));		
+			SQL_TQuery(db, SQL_Transfer, buffer, GetClientUserId(target));		
+			if(g_bTargetGuild[target])
+			{
+				Shop_GiveClientCredits(target, suma_transfer[client]);
+				Shop_TakeClientCredits(client, suma_transfer[client]);
+				CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Ai trimis %d credite catre coechiperul tau!", suma_transfer[client]);
+				CPrintToChatEx(target, target, "{green}[FACTIONS] {default}Ai primit %d credite de la coechiperul tau!", suma_transfer[client]);
+				suma_transfer[client]=0;
+				g_bTargetGuild[target]=false;
+			}
+			else
+			{
+				suma_transfer[client]=0;
+				CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Jucatorul nu este in FACTIUNEA TA pentru a putea trasfera credite!");
+			}
 		}
 		else {
 			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Jucatorul nu a fost gasit!");
@@ -40,27 +56,14 @@ public void SQL_Transfer(Handle owner, Handle hndl, const char[] error, any data
 		PrintToServer("SQL_Transfer error: %s", error);
 		return;
 	}
-	int client = GetClientOfUserId(data), target = GetClientOfUserId(data);
+	int target = GetClientOfUserId(data);
 	char numeb_target[30];
-	if(client == 0)
-	{
-		return;
-	}
 	if(SQL_FetchRow(hndl))
 	{
 		SQL_FetchString(hndl, 2, numeb_target, sizeof(numeb_target));
-		if(StrContains(PlayerGuildTag[client], numeb_target))
+		if(StrContains(PlayerGuildTag[clientid], numeb_target))
 		{
-			Shop_GiveClientCredits(target, suma_transfer[client]);
-			Shop_TakeClientCredits(client, suma_transfer[client]);
-			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Ai trimis %d credite catre coechiperul tau!", suma_transfer[client]);
-			CPrintToChatEx(target, target, "{green}[FACTIONS] {default}Ai primit %d credite de la coechiperul tau!", suma_transfer[client]);
-			suma_transfer[client]=0;
-		}
-		else
-		{
-			suma_transfer[client]=0;
-			CPrintToChatEx(client, client, "{green}[FACTIONS] {default}Jucatorul nu este in FACTIUNEA TA pentru a putea trasfera credite!");
-		}
+			g_bTargetGuild[target]=true;
+		}		
 	}
 }

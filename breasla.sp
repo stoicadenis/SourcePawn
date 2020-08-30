@@ -1,3 +1,4 @@
+#define MAX_LENGTH_MENU 470
 #pragma semicolon 1
 
 #include <sourcemod>
@@ -22,10 +23,10 @@ ConVar g_hGuildEnable;
 
 
 public Plugin myinfo = {
-	name="Breasla",
+	name="FACTIONS",
 	author="Pizant",
-	description="Bresle/ Clanuri create de playeri cu beneficii catre toti cei din breasla la anumite nivele de exp",
-	version="1.0"
+	description="Factiuni/ Bresle create de playeri cu beneficii",
+	version="2.0"
 	
 };
 
@@ -190,7 +191,7 @@ public int Menu_Del(Menu menu, MenuAction action, int param1, int param2){
 			char buffer[200], steamid[22];
 			GetClientAuthId(param1, AuthId_Steam2, steamid, sizeof(steamid));
 			CPrintToChatEx(param1, param1, "{green}[FACTIONS] {default}Ai sters factiunea cu succes!");
-			Format(buffer, sizeof(buffer), "SELECT FROM guild WHERE steamid = '%s'", steamid);
+			Format(buffer, sizeof(buffer), "SELECT * FROM guild WHERE steamid = '%s'", steamid);
 			SQL_TQuery(db, SQL_DeleteGuild, buffer);
 			g_bIsPlayerInGuild[param1]=false;
 			g_bIsPlayerOwner[param1]=false;
